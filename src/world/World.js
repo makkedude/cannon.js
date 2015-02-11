@@ -177,7 +177,7 @@ function World(){
         makeContactConstraints:0,
         broadphase:0,
         integrate:0,
-        narrowphase:0,
+        narrowphase:0
     };
 
     /**
@@ -188,12 +188,12 @@ function World(){
 
     this.addBodyEvent = {
         type:"addBody",
-        body : null,
+        body : null
     };
 
     this.removeBodyEvent = {
         type:"removeBody",
-        body : null,
+        body : null
     };
 }
 World.prototype = new EventTarget();
@@ -422,6 +422,7 @@ World.prototype.addContactMaterial = function(cmat) {
 };
 
 // performance.now()
+
 if(typeof performance === 'undefined'){
     performance = {};
 }
