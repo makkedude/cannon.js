@@ -1,3 +1,6 @@
+/* global module */
+/* global require */
+
 module.exports = Ray;
 
 var Vec3 = require('../math/Vec3');
@@ -216,7 +219,8 @@ Ray.prototype.intersectBodies = function (bodies, result) {
         this._updateDirection();
     }
 
-    for ( var i = 0, l = bodies.length; !this.result._shouldStop && i < l; i ++ ) {
+    for ( var i = 0, len = bodies.length; i < len; i ++ ) {
+        if(this.result._shouldStop) break;
         this.intersectBody(bodies[i]);
     }
 };
@@ -333,15 +337,10 @@ Ray.prototype[Shape.types.PLANE] = Ray.prototype.intersectPlane;
  * @method getAABB
  * @param  {AABB} aabb
  */
-Ray.prototype.getAABB = function(result){
+Ray.prototype.getAABB = function(resultAAbox){
     var to = this.to;
     var from = this.from;
-    result.lowerBound.x = Math.min(to.x, from.x);
-    result.lowerBound.y = Math.min(to.y, from.y);
-    result.lowerBound.z = Math.min(to.z, from.z);
-    result.upperBound.x = Math.max(to.x, from.x);
-    result.upperBound.y = Math.max(to.y, from.y);
-    result.upperBound.z = Math.max(to.z, from.z);
+    resultAAbox.setFromTo(from, to);
 };
 
 var intersectConvexOptions = {
