@@ -1,4 +1,4 @@
-/* global performance */
+/* jshint performance */
 
 module.exports = World;
 
