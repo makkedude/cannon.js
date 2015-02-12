@@ -230,17 +230,25 @@ Vec3.prototype.norm2 = function(){
 Vec3.prototype.lengthSquared = Vec3.prototype.norm2;
 
 /**
+ * Get squared distance from this point to another point
+ * @method distanceToSquared
+ * @param  {Vec3} p
+ * @return {Number}
+ */
+Vec3.prototype.distanceToSquared = function(p){
+    var x=this.x, y=this.y, z=this.z;
+    var px=p.x, py=p.y, pz=p.z;
+    return (px-x)*(px-x) + (py-y)*(py-y) + (pz-z)*(pz-z);
+};
+
+/**
  * Get distance from this point to another point
  * @method distanceTo
  * @param  {Vec3} p
  * @return {Number}
  */
 Vec3.prototype.distanceTo = function(p){
-    var x=this.x, y=this.y, z=this.z;
-    var px=p.x, py=p.y, pz=p.z;
-    return Math.sqrt((px-x)*(px-x)+
-                     (py-y)*(py-y)+
-                     (pz-z)*(pz-z));
+    return Math.sqrt(this.distanceToSquared(p));
 };
 
 /**
