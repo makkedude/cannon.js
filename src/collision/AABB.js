@@ -94,19 +94,20 @@ AABB.prototype.setFromPoints = function(points, position, quaternion, skinSize){
 
 /**
  * Set the AABB bounds min and max values from two vectors
- * @method setFromTo
- * @param {Vec3} from
- * @param {Vec3} to
+ * @method setFromTwoPoints
+ * @param {Vec3} point1
+ * @param {Vec3} point2
  * @return {AABB} The self object
  */
-AABB.prototype.setFromTo = function(from, to) {
+AABB.prototype.setFromTwoPoints = function(point1, point2) {
 
-    this.lowerBound.x = Math.min(to.x, from.x);
-    this.lowerBound.y = Math.min(to.y, from.y);
-    this.lowerBound.z = Math.min(to.z, from.z);
-    this.upperBound.x = Math.max(to.x, from.x);
-    this.upperBound.y = Math.max(to.y, from.y);
-    this.upperBound.z = Math.max(to.z, from.z);
+    this.lowerBound.x = Math.min(point2.x, point1.x);
+    this.lowerBound.y = Math.min(point2.y, point1.y);
+    this.lowerBound.z = Math.min(point2.z, point1.z);
+
+    this.upperBound.x = Math.max(point2.x, point1.x);
+    this.upperBound.y = Math.max(point2.y, point1.y);
+    this.upperBound.z = Math.max(point2.z, point1.z);
 
     return this;
 };

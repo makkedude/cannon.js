@@ -335,12 +335,11 @@ Ray.prototype[Shape.types.PLANE] = Ray.prototype.intersectPlane;
 /**
  * Get the AABB of the ray.
  * @method getAABB
- * @param  {AABB} aabb
+ * @param  {AABB} resultAABox
  */
-Ray.prototype.getAABB = function(resultAAbox){
-    var to = this.to;
-    var from = this.from;
-    resultAAbox.setFromTo(from, to);
+Ray.prototype.getAABB = function(resultAABox){
+
+    resultAABox.setFromTwoPoints(this.from, this.to);
 };
 
 var intersectConvexOptions = {
