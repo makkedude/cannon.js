@@ -62,6 +62,16 @@ function Trimesh(vertices, indices) {
      */
     this.edges = null;
 
+    /**
+     * Local scaling of the mesh. Use .setScale() to set it.
+     * @property {Vec3} scale
+     */
+    this.scale = new Vec3(1, 1, 1);
+
+    /**
+     * The indexed triangles. Use .updateTree() to update it.
+     * @property {Octree} tree
+     */
     this.tree = new Octree();
 
     this.updateEdges();
@@ -83,6 +93,13 @@ Trimesh.prototype.updateTree = function(){
 
     tree.reset();
     tree.aabb.copy(this.aabb);
+    var scale = this.scale; // The local mesh AABB is scaled, but the octree AABB should be unscaled
+    tree.aabb.lowerBound.x *= 1 / scale.x;
+    tree.aabb.lowerBound.y *= 1 / scale.y;
+    tree.aabb.lowerBound.z *= 1 / scale.z;
+    tree.aabb.upperBound.x *= 1 / scale.x;
+    tree.aabb.upperBound.y *= 1 / scale.y;
+    tree.aabb.upperBound.z *= 1 / scale.z;
 
     // Insert all triangles
     var triangleAABB = new AABB();
@@ -91,15 +108,62 @@ Trimesh.prototype.updateTree = function(){
     var c = new Vec3();
     var points = [a, b, c];
     for (var i = 0; i < this.indices.length / 3; i++) {
-        this.getTriangleVertices(i, a, b, c);
+        //this.getTriangleVertices(i, a, b, c);
+
+        // Get unscaled triangle verts
+        var i3 = i * 3;
+        this._getUnscaledVertex(this.indices[i3], a);
+        this._getUnscaledVertex(this.indices[i3 + 1], b);
+        this._getUnscaledVertex(this.indices[i3 + 2], c);
+
         triangleAABB.setFromPoints(points);
         tree.insert(triangleAABB, i);
     }
     tree.removeEmptyNodes();
 };
 
+var unscaledAABB = new AABB();
+
+/**
+ * Get triangles in a local AABB from the trimesh.
+ * @param  {AABB} aabb
+ * @param  {array} result An array of integers, referencing the queried triangles.
+ */
 Trimesh.prototype.getTrianglesInAABB = function(aabb, result){
-    return this.tree.aabbQuery(aabb, result);
+    unscaledAABB.copy(aabb);
+
+    // Scale it to local
+    var scale = this.scale;
+    var isx = scale.x;
+    var isy = scale.y;
+    var isz = scale.z;
+    var l = unscaledAABB.lowerBound;
+    var u = unscaledAABB.upperBound;
+    l.x /= isx;
+    l.y /= isy;
+    l.z /= isz;
+    u.x /= isx;
+    u.y /= isy;
+    u.z /= isz;
+
+    return this.tree.aabbQuery(unscaledAABB, result);
+};
+
+/**
+ * @method setScale
+ * @param {Vec3} scale
+ */
+Trimesh.prototype.setScale = function(scale){
+    var wasUniform = this.scale.x === this.scale.y === this.scale.z;
+    var isUniform = scale.x === scale.y === scale.z;
+
+    if(!(wasUniform && isUniform)){
+        // Non-uniform scaling. Need to update normals.
+        this.updateNormals();
+    }
+    this.scale.copy(scale);
+    this.updateAABB();
+    this.updateBoundingSphereRadius();
 };
 
 /**
@@ -219,11 +283,29 @@ var vc = new Vec3();
  * @return {Vec3} The "out" vector object
  */
 Trimesh.prototype.getVertex = function(i, out){
+    var scale = this.scale;
+    this._getUnscaledVertex(i, out);
+    out.x *= scale.x;
+    out.y *= scale.y;
+    out.z *= scale.z;
+    return out;
+};
+
+/**
+ * Get raw vertex i
+ * @private
+ * @method _getUnscaledVertex
+ * @param  {number} i
+ * @param  {Vec3} out
+ * @return {Vec3} The "out" vector object
+ */
+Trimesh.prototype._getUnscaledVertex = function(i, out){
     var i3 = i * 3;
+    var vertices = this.vertices;
     return out.set(
-        this.vertices[i3],
-        this.vertices[i3 + 1],
-        this.vertices[i3 + 2]
+        vertices[i3],
+        vertices[i3 + 1],
+        vertices[i3 + 2]
     );
 };
 

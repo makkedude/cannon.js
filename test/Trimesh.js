@@ -23,37 +23,78 @@ module.exports = {
         test.done();
     },
 
-    updateTree: function(test){
-        var mesh = Trimesh.createTorus();
-        mesh.updateTree();
-        test.done();
+    updateTree: {
+        scaled: function(test){
+            var mesh = Trimesh.createTorus();
+            mesh.updateTree();
+
+            var bigMesh = Trimesh.createTorus();
+            bigMesh.setScale(new Vec3(2,2,2));
+
+            test.equal(bigMesh.aabb.upperBound.x, mesh.aabb.upperBound.x * 2, 'AABB does not scale with the mesh!');
+
+            test.equal(bigMesh.tree.aabb.upperBound.x, mesh.tree.aabb.upperBound.x, 'Octree AABB scales with the mesh, which is wrong!');
+
+            test.done();
+        }
     },
 
-    getTrianglesInAABB: function(test){
-        var mesh = Trimesh.createTorus(1,1,16,16);
-        var result = [];
+    getTrianglesInAABB: {
+        unscaled: function(test){
+            var mesh = Trimesh.createTorus(1,1,16,16);
+            var result = [];
 
-        // Should get all triangles if we use the full AABB
-        var aabb = mesh.aabb.clone();
-        mesh.getTrianglesInAABB(aabb, result);
-        test.equal(result.length, mesh.indices.length / 3);
+            // Should get all triangles if we use the full AABB
+            var aabb = mesh.aabb.clone();
+            mesh.getTrianglesInAABB(aabb, result);
+            test.equal(result.length, mesh.indices.length / 3);
 
-        // Should get less triangles if we use the half AABB
-        result.length = 0;
-        aabb.lowerBound.scale(0.5, aabb.lowerBound);
-        aabb.upperBound.scale(0.5, aabb.upperBound);
-        mesh.getTrianglesInAABB(aabb, result);
-        test.ok(result.length < mesh.indices.length / 3);
+            // Should get less triangles if we use the half AABB
+            result.length = 0;
+            aabb.lowerBound.scale(0.5, aabb.lowerBound);
+            aabb.upperBound.scale(0.5, aabb.upperBound);
+            mesh.getTrianglesInAABB(aabb, result);
+            test.ok(result.length < mesh.indices.length / 3);
 
-        test.done();
+            test.done();
+        },
+
+        // scaled: function(test){
+        //     var mesh = Trimesh.createTorus(1,1,16,16);
+        //     var result = [];
+
+        //     // Should get all triangles if we use the full AABB
+        //     var aabb = mesh.aabb.clone();
+        //     mesh.getTrianglesInAABB(aabb, result);
+        //     test.equal(result.length, mesh.indices.length / 3);
+
+        //     // Should get less triangles if we use the half AABB
+        //     result.length = 0;
+        //     aabb.lowerBound.scale(0.5, aabb.lowerBound);
+        //     aabb.upperBound.scale(0.5, aabb.upperBound);
+        //     mesh.getTrianglesInAABB(aabb, result);
+        //     test.ok(result.length < mesh.indices.length / 3);
+
+        //     test.done();
+        // }
     },
 
-    getVertex: function(test){
-        var mesh = Trimesh.createTorus();
-        var vertex = new Vec3();
-        mesh.getVertex(0, vertex);
-        test.deepEqual(vertex, new Vec3(mesh.vertices[0], mesh.vertices[1], mesh.vertices[2]));
-        test.done();
+    getVertex: {
+        unscaled: function(test){
+            var mesh = Trimesh.createTorus();
+            var vertex = new Vec3();
+            mesh.getVertex(0, vertex);
+            test.deepEqual(vertex, new Vec3(mesh.vertices[0], mesh.vertices[1], mesh.vertices[2]));
+            test.done();
+        },
+        scaled: function(test){
+            var mesh = Trimesh.createTorus();
+            mesh.setScale(new Vec3(1,2,3));
+            var vertex = new Vec3();
+            mesh.getVertex(0, vertex);
+            test.deepEqual(vertex, new Vec3(1 * mesh.vertices[0], 2 * mesh.vertices[1], 3 * mesh.vertices[2]));
+            test.done();
+        }
     },
 
     getWorldVertex: function(test){
